@@ -1,0 +1,69 @@
+# To get started with security, check out the documentation:
+# https://symfony.com/doc/current/security.html
+security:
+    encoders:
+        \AppBundle\Entity\User: plaintext
+        \AppBundle\Entity\Admin: plaintext
+
+    # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
+    providers:
+        user_provider:
+            entity:
+                class: \AppBundle\Entity\User
+                property: username
+        
+        admin_provider:
+            entity:
+                class: \AppBundle\Entity\Admin
+                property: username
+
+    firewalls:
+        # disables authentication for assets and the profiler, adapt it according to your needs
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        
+        #user login config
+        user:
+            pattern: ^/user
+            anonymous: true
+            provider: user_provider
+            form_login:
+                login_path: _user_login
+                check_path: _user_login
+                username_parameter: _username
+                password_parameter: _password
+                default_target_path: /user/dashboard
+                always_use_default_target_path: true
+                
+            logout: 
+                path: _user_logout
+                target: _user_login
+                invalidate_session: true
+        
+        #admin login config
+        admin:
+            pattern: ^/
+            anonymous: true
+            provider: admin_provider
+            form_login:
+                login_path: _admin_login
+                check_path: _admin_login
+                username_parameter: _username
+                password_parameter: _password
+                default_target_path: /dashboard
+                always_use_default_target_path: true
+
+            logout:
+                path: _admin_logout
+                target: _admin_login
+                invalidate_session: true
+
+    access_control:  
+         - { path: ^/user/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+         - { path: ^/user/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }              
+         - { path: ^/user, roles: ROLE_USER }
+       
+
+    
+

@@ -1,0 +1,150 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+<a href='/user/logout'>logout</a>
+{% set book = 0 %}
+    <h2> View flight here </h2>
+
+    <table>
+        <caption> Flight's Details </caption>
+        <thead>
+            <tr>
+                <th> Name </th>
+                <th> Seats </th>
+                <th> Price/seat </th>
+                <th> seat book </th>
+                <th> fair </th>
+            </tr>
+        </thead>
+         
+        {% for flight in flights %}
+            <tr>
+                <td> {{ flight.name }} </td>
+                <td> {{ flight.seats }} </td>
+                <td> {{ flight.price }} </td>
+                <td>
+                 <input type='number' id = "seat_{{flight.id}}" onkeyup="calcPrice({{flight.id}},{{flight.price}})" name='book' value="{{ book }}" min='0'/>
+                </td>
+                <td>
+                    <span id="price_{{flight.id}}">0</span>
+                </td>
+                <td>
+                    <a onclick="sendSeats({{flight.id}},'{{flight.name}}')"class="waves-effect waves-light btn"> Book </a>
+                </td>
+            </tr>
+        {% endfor %}
+           
+        </form>
+    </table>
+
+    {{dump(session)}}
+    {{dump(app.user)}}
+
+<div id='backdrop'></div>
+<div id='modal'>
+    <div class='modal-title'>Session Expiry</div>
+    <div class='modal-msg'>Please press OK to extend the session in <span id='modal-time'></span> sec</div>
+    <button onclick="logout();"> Cancel </button>
+    <button onclick="sessionExtend();"> OK </button>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        let session = {{sessionExpTime}}; //set the session value with sessionExpTime
+
+        //function to calculate the seats price
+        function calcPrice(id,pricePerSeat){            
+            let seats = document.getElementById("seat_"+id).value;
+            let price = pricePerSeat * seats;
+            document.getElementById("price_"+id).innerHTML = price;
+        }
+
+        //function to send booking details to the book-flight route
+        function sendSeats(id, flightName){
+            let seats = document.getElementById("seat_"+id).value;
+            window.location.href = "/user/book-flight/"+id+"/"+flightName+"/"+seats;
+        }
+
+        //function to check session life
+        function checkSession(){
+            if (session < 15 && session >13){
+                document.getElementById('backdrop').style.display = 'block';
+                document.getElementById('modal').style.display = 'block';
+                document.getElementById('modal-time').innerHTML = session;
+            }
+            session -= 1;
+            if(session <= 0){
+                console.log("jk");
+                logout();
+            } 
+        }
+        setIntId = setInterval(checkSession,1000);
+       
+        //function to send session extend request
+        function sessionExtend(){
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+
+                if (this.readyState == 4) {
+                    session = this.responseText;
+                    console.log(session);
+
+                }
+            };
+            document.getElementById('backdrop').style.display = 'none';
+            document.getElementById('modal').style.display = 'none';
+                
+            xhr.open("GET", "/user/sessionExtend", true);
+            xhr.send();
+            location.reload();
+        }
+
+        //function to logout the user
+        function logout(){
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET","/user/logout.php",true);
+            xhr.send();
+            location.reload();
+        }
+    </script>
+{% endblock %}
+
+
+{% block stylesheets %}
+
+<style>
+ #backdrop{
+     position: fixed;
+     top: 0;
+     left: 0;
+     background: rgba(0,0,0,0.6);
+     z-index: 0;
+     height: 100vh;
+     width: 100vw;
+     display: none;
+ }
+
+ #modal {
+     position: fixed;
+     top: 20%;
+     left: 25%;
+     height: 30vh;
+     width: 40vw;
+     background: white;
+     display: none;
+ }
+ .modal-title {
+     margin: auto;
+ }
+ .modal-msg {
+     margin: 20px;
+ }
+ #modal-time {
+     color: red;
+ }
+ button {
+     margin: auto 20px;
+ }
+</style>
+{% endblock %}

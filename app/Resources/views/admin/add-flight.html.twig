@@ -1,0 +1,14 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+<a href='/logout'>logout</a>
+
+    {{ form_start(form) }}
+        
+    {# {{ form_row(form.field, {'attr': {'data-row-class': 'my-row-class'} }) }} #}
+   
+                {{ form_widget(form) }}
+ 
+    {{ form_end(form) }}
+    
+{% endblock %}

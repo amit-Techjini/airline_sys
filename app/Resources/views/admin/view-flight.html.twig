@@ -1,0 +1,24 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+    <a href='/logout'>logout</a>
+
+    <h2> View flight here </h2>
+    <table>
+        <caption> Flight's Details </caption>
+        <tr>
+            <th> Name </th>
+            <th> Seats </th>
+            <th> Price </th>
+        </tr>
+
+        {% for flight in flights %}
+            <tr>
+                <td> {{ flight.name }} </td>
+                <td> {{ flight.seats }} </td>
+                <td> {{ flight.price }} </td>
+                <td> <a href='edit-flight/{{ flight.id }}'>edit</a> &nbsp; <a href='delete-flight/{{ flight.id }}' onclick='confirm("Are you sure!")'>delete</a> </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
